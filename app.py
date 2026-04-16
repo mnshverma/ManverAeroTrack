@@ -238,8 +238,8 @@ if go_btn:
                         </div>
                         <div class="glass-card" style="flex: 1;">
                             <div style="font-size: 9px; color: #8899bb;">UV INDEX</div>
-                            <div style="font-size: 18px; font-weight: 700;">{arr_w['uv_index'] if arr_w else 'N/A'}</div>
-                            <div style="font-size: 10px; color: #ffb300;">{uv_category(arr_w['uv_index'])[0] if arr_w and 'uv_index' in arr_w else ''}</div>
+                            <div style="font-size: 18px; font-weight: 700;">{arr_w.get('uv_index', 'N/A') if arr_w else 'N/A'}</div>
+                            <div style="font-size: 10px; color: #ffb300;">{uv_category(arr_w.get('uv_index') or 0)[0] if arr_w else ''}</div>
                         </div>
                     </div>
                     """, unsafe_allow_html=True)
@@ -252,9 +252,12 @@ if go_btn:
                 with i3:
                     if arr_ap and arr_w:
                         packs = get_packing_suggestions(arr_w, arr_ap['city'])
-                        cols = st.columns(min(len(packs), 4))
-                        for idx, p in enumerate(packs):
-                            cols[idx % 4].markdown(f'<div class="glass-card" style="padding: 10px; text-align: center;"><div style="font-size: 20px;">{p["icon"]}</div><div style="font-weight: 700; font-size: 11px; margin-top: 3px;">{p["item"]}</div></div>', unsafe_allow_html=True)
+                        if packs:
+                            cols = st.columns(min(len(packs), 4))
+                            for idx, p in enumerate(packs):
+                                cols[idx % 4].markdown(f'<div class="glass-card" style="padding: 10px; text-align: center;"><div style="font-size: 20px;">{p["icon"]}</div><div style="font-weight: 700; font-size: 11px; margin-top: 3px;">{p["item"]}</div></div>', unsafe_allow_html=True)
+                        else:
+                            st.info("No specific packing items suggested for this climate.")
 
             elif s_mode == "Route Diagnostics":
                 st.info("Route Diagnostics synchronized. Analyzing data...")

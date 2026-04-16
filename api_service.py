@@ -334,9 +334,14 @@ def assess_delay_risk(dep_weather: dict | None, arr_weather: dict | None) -> dic
 
 # ── Feature: UV Safety ────────────────────────────────────────────────────────
 
-def uv_category(uv: float) -> tuple[str, str]:
-    if uv < 3: return "Low", "🟢"
-    if uv < 6: return "Moderate", "🟡"
-    if uv < 8: return "High", "🟠"
-    if uv < 11: return "Very High", "🔴"
-    return "Extreme", "🟣"
+def uv_category(uv) -> tuple[str, str]:
+    if uv is None: return "N/A", "⚪"
+    try:
+        val = float(uv)
+        if val < 3: return "Low", "🟢"
+        if val < 6: return "Moderate", "🟡"
+        if val < 8: return "High", "🟠"
+        if val < 11: return "Very High", "🔴"
+        return "Extreme", "🟣"
+    except:
+        return "Unknown", "❓"
