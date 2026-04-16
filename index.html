@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ManwarAeroTrack — Live Flight Tracker</title>
+  <meta name="description" content="Track real-time flight status, departure & arrival temperatures with ManwarAeroTrack — a free, open-source flight tracking platform." />
+  <meta name="keywords" content="flight tracker, live flight status, airport weather, ManwarAeroTrack, open source" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-canvas" id="bgCanvas">
+    <canvas id="particleCanvas"></canvas>
+    <div class="bg-gradient-orbs">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="app-header" id="appHeader">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="22" stroke="url(#logoGrad)" stroke-width="2" stroke-dasharray="4 2"/>
+            <circle cx="24" cy="24" r="14" stroke="url(#logoGrad)" stroke-width="1" opacity="0.5"/>
+            <path d="M24 8 L28 22 L42 24 L28 26 L24 40 L20 26 L6 24 L20 22 Z" fill="url(#logoGrad)" opacity="0.3"/>
+            <path d="M12 20 L18 23 L12 24 L10 23.5 Z" fill="url(#logoGrad)"/>
+            <path d="M36 20 L30 23 L36 24 L38 23.5 Z" fill="url(#logoGrad)"/>
+            <path d="M16 14 L24 10 L32 14 L24 18 Z" fill="url(#logoGrad)" opacity="0.8"/>
+            <path d="M20 24 L24 14 L28 24 L26 28 L22 28 Z" fill="white"/>
+            <defs>
+              <linearGradient id="logoGrad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#00d4ff"/>
+                <stop offset="100%" stop-color="#7b5ea7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">Manwar<span class="brand-accent">Aero</span>Track</span>
+          <span class="brand-tagline">Live Flight Intelligence</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="#tracker" class="nav-link active" id="navTracker">Track Flight</a>
+        <a href="#live-map" class="nav-link" id="navMap">Live Map</a>
+        <a href="#about" class="nav-link" id="navAbout">About</a>
+        <a href="https://github.com" target="_blank" class="nav-btn-outline" id="navGithub">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          Open Source
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main App -->
+  <main class="app-main">
+
+    <!-- Hero Section -->
+    <section class="hero-section" id="hero">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="dot-live"></span>
+          Real-time Tracking Enabled
+        </div>
+        <h1 class="hero-title">
+          Track Any Flight,<br/>
+          <span class="gradient-text">Anywhere, Anytime</span>
+        </h1>
+        <p class="hero-subtitle">Open-source flight status tracker with live departure & arrival weather intelligence.</p>
+
+        <!-- Search Box -->
+        <div class="search-container" id="tracker">
+          <div class="search-glass">
+            <div class="search-tabs">
+              <button class="search-tab active" id="tabFlight" onclick="switchTab('flight')">
+                ✈ Flight Number
+              </button>
+              <button class="search-tab" id="tabRoute" onclick="switchTab('route')">
+                ⇄ Route Search
+              </button>
+            </div>
+
+            <!-- Flight Number Search -->
+            <div class="search-panel active" id="panelFlight">
+              <div class="input-group">
+                <div class="input-wrapper">
+                  <label class="input-label">Flight Number</label>
+                  <input type="text" id="flightInput" class="search-input" placeholder="e.g.  AI101, BA249, EK500" maxlength="8" autocomplete="off" />
+                  <div class="input-hint">Enter IATA airline code + flight number</div>
+                </div>
+                <button class="search-btn" id="searchFlightBtn" onclick="searchFlight()">
+                  <span class="btn-text">Track Flight</span>
+                  <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013 9.13a19.79 19.79 0 01-3.07-8.67A2 2 0 011.9 2.5h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 10.16a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Route Search -->
+            <div class="search-panel" id="panelRoute">
+              <div class="input-group route-group">
+                <div class="input-wrapper">
+                  <label class="input-label">From (IATA)</label>
+                  <input type="text" id="fromInput" class="search-input" placeholder="e.g. DEL, BOM, LHR" maxlength="4" autocomplete="off" />
+                </div>
+                <div class="route-arrow">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </div>
+                <div class="input-wrapper">
+                  <label class="input-label">To (IATA)</label>
+                  <input type="text" id="toInput" class="search-input" placeholder="e.g. DXB, JFK, SIN" maxlength="4" autocomplete="off" />
+                </div>
+                <button class="search-btn" id="searchRouteBtn" onclick="searchRoute()">
+                  <span class="btn-text">Search</span>
+                  <svg class="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Sample Flights -->
+            <div class="sample-flights">
+              <span class="sample-label">Try:</span>
+              <button class="sample-chip" onclick="quickSearch('EK202')">EK202</button>
+              <button class="sample-chip" onclick="quickSearch('BA249')">BA249</button>
+              <button class="sample-chip" onclick="quickSearch('AI101')">AI101</button>
+              <button class="sample-chip" onclick="quickSearch('QR521')">QR521</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Plane Animation -->
+      <div class="hero-plane">
+        <div class="plane-trail"></div>
+        <svg class="plane-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M85 50 L15 25 L30 50 L15 75 Z" fill="url(#planeGrad)"/>
+          <path d="M50 35 L65 50 L50 65 L40 55 L55 50 L40 45 Z" fill="rgba(255,255,255,0.4)"/>
+          <path d="M30 50 L40 40 L40 60 Z" fill="rgba(0,212,255,0.6)"/>
+          <defs>
+            <linearGradient id="planeGrad" x1="15" y1="25" x2="85" y2="75" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#00d4ff"/>
+              <stop offset="100%" stop-color="#7b5ea7"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Results Section (hidden by default) -->
+    <section class="results-section" id="resultsSection" style="display:none">
+      <div class="results-inner">
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState">
+          <div class="radar-loader">
+            <div class="radar-ring r1"></div>
+            <div class="radar-ring r2"></div>
+            <div class="radar-ring r3"></div>
+            <div class="radar-dot"></div>
+            <div class="radar-sweep"></div>
+          </div>
+          <p class="loading-text">Scanning airspace...</p>
+          <p class="loading-sub">Fetching live flight data & weather</p>
+        </div>
+
+        <!-- Error State -->
+        <div class="error-state" id="errorState" style="display:none">
+          <div class="error-icon">⚠️</div>
+          <h3 class="error-title" id="errorTitle">Flight Not Found</h3>
+          <p class="error-msg" id="errorMsg">We couldn't locate this flight. Please check the flight number and try again.</p>
+          <button class="retry-btn" onclick="resetSearch()">Try Another Flight</button>
+        </div>
+
+        <!-- Flight Results -->
+        <div class="flight-results" id="flightResults" style="display:none">
+
+          <!-- Flight Header Card -->
+          <div class="result-card flight-header-card">
+            <div class="flight-status-badge" id="flightStatusBadge">
+              <span class="status-dot" id="statusDot"></span>
+              <span id="statusText">Loading...</span>
+            </div>
+            <div class="flight-identity">
+              <div class="flight-number-display">
+                <span class="fn-callsign" id="flightCallsign">--</span>
+                <span class="fn-airline" id="flightAirline">--</span>
+              </div>
+              <div class="flight-aircraft" id="flightAircraft">--</div>
+            </div>
+            <div class="flight-progress-wrap">
+              <div class="flight-progress-track">
+                <div class="fp-airport">
+                  <div class="fp-code" id="depCode">--</div>
+                  <div class="fp-city" id="depCity">--</div>
+                  <div class="fp-time" id="depTime">--:--</div>
+                </div>
+                <div class="fp-line">
+                  <div class="fp-elapsed" id="fpElapsed" style="width: 0%"></div>
+                  <div class="fp-plane-icon moving-plane">✈</div>
+                </div>
+                <div class="fp-airport">
+                  <div class="fp-code" id="arrCode">--</div>
+                  <div class="fp-city" id="arrCity">--</div>
+                  <div class="fp-time" id="arrTime">--:--</div>
+                </div>
+              </div>
+              <div class="fp-stats">
+                <div class="fp-stat">
+                  <div class="fp-stat-val" id="fpAlt">--</div>
+                  <div class="fp-stat-lbl">Altitude</div>
+                </div>
+                <div class="fp-stat">
+                  <div class="fp-stat-val" id="fpSpeed">--</div>
+                  <div class="fp-stat-lbl">Speed</div>
+                </div>
+                <div class="fp-stat">
+                  <div class="fp-stat-val" id="fpETA">--</div>
+                  <div class="fp-stat-lbl">Est. Arrival</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weather Row -->
+          <div class="weather-row">
+            <!-- Departure Weather -->
+            <div class="result-card weather-card departure-weather">
+              <div class="weather-card-header">
+                <div class="weather-loc-tag">DEPARTURE</div>
+                <div class="weather-city" id="depWeatherCity">--</div>
+                <div class="weather-airport" id="depWeatherAirport">--</div>
+              </div>
+              <div class="weather-main">
+                <div class="weather-icon-wrap" id="depWeatherIcon">🌤</div>
+                <div class="weather-temp-display">
+                  <span class="temp-value" id="depTemp">--</span>
+                  <span class="temp-unit">°C</span>
+                </div>
+              </div>
+              <div class="weather-details">
+                <div class="wd-item">
+                  <span class="wd-icon">💧</span>
+                  <span class="wd-label">Humidity</span>
+                  <span class="wd-value" id="depHumidity">--%</span>
+                </div>
+                <div class="wd-item">
+                  <span class="wd-icon">💨</span>
+                  <span class="wd-label">Wind</span>
+                  <span class="wd-value" id="depWind">-- km/h</span>
+                </div>
+                <div class="wd-item">
+                  <span class="wd-icon">👁</span>
+                  <span class="wd-label">Visibility</span>
+                  <span class="wd-value" id="depVisibility">-- km</span>
+                </div>
+                <div class="wd-item">
+                  <span class="wd-icon">🌡</span>
+                  <span class="wd-label">Feels Like</span>
+                  <span class="wd-value" id="depFeelsLike">--°C</span>
+                </div>
+              </div>
+              <div class="weather-condition" id="depCondition">Loading weather...</div>
+            </div>
+
+            <!-- Route Visual -->
+            <div class="result-card route-visual-card">
+              <div class="route-viz">
+                <div class="rv-label">Route</div>
+                <div class="rv-from" id="rvFrom">--</div>
+                <div class="rv-line">
+                  <div class="rv-arc"></div>
+                  <div class="rv-plane">✈</div>
+                </div>
+                <div class="rv-to" id="rvTo">--</div>
+                <div class="rv-distance" id="rvDistance">-- km</div>
+              </div>
+              <div class="route-info">
+                <div class="ri-item">
+                  <span class="ri-icon">🛫</span>
+                  <span class="ri-val" id="riDepGate">Gate --</span>
+                </div>
+                <div class="ri-item">
+                  <span class="ri-icon">🛬</span>
+                  <span class="ri-val" id="riArrGate">Gate --</span>
+                </div>
+                <div class="ri-item">
+                  <span class="ri-icon">⏱</span>
+                  <span class="ri-val" id="riDuration">-- hrs flight</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Arrival Weather -->
+            <div class="result-card weather-card arrival-weather">
+              <div class="weather-card-header">
+                <div class="weather-loc-tag arrival-tag">ARRIVAL</div>
+                <div class="weather-city" id="arrWeatherCity">--</div>
+                <div class="weather-airport" id="arrWeatherAirport">--</div>
+              </div>
+              <div class="weather-main">
+                <div class="weather-icon-wrap" id="arrWeatherIcon">🌤</div>
+                <div class="weather-temp-display">
+                  <span class="temp-value" id="arrTemp">--</span>
+                  <span class="temp-unit">°C</span>
+                </div>
+              </div>
+              <div class="weather-details">
+                <div class="wd-item">
+                  <span class="wd-icon">💧</span>
+                  <span class="wd-label">Humidity</span>
+                  <span class="wd-value" id="arrHumidity">--%</span>
+                </div>
+                <div class="wd-item">
+                  <span class="wd-icon">💨</span>
+                  <span class="wd-label">Wind</span>
+                  <span class="wd-value" id="arrWind">-- km/h</span>
+                </div>
+                <div class="wd-item">
+                  <span class="wd-icon">👁</span>
+                  <span class="wd-label">Visibility</span>
+                  <span class="wd-value" id="arrVisibility">-- km</span>
+                </div>
+                <div class="wd-item">
+                  <span class="wd-icon">🌡</span>
+                  <span class="wd-label">Feels Like</span>
+                  <span class="wd-value" id="arrFeelsLike">--°C</span>
+                </div>
+              </div>
+              <div class="weather-condition" id="arrCondition">Loading weather...</div>
+            </div>
+          </div>
+
+          <!-- Route Search Results (multiple flights) -->
+          <div id="multiFlightList" style="display:none">
+            <h3 class="section-title">Flights on this Route</h3>
+            <div class="flight-list" id="flightListContainer"></div>
+          </div>
+
+          <!-- Back Button -->
+          <div class="back-row">
+            <button class="back-btn" onclick="resetSearch()">
+              ← Track Another Flight
+            </button>
+            <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">
+              ↻ Refresh Live Data
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Live Stats Bar -->
+    <section class="stats-bar" id="statsBar">
+      <div class="stats-inner">
+        <div class="stat-item">
+          <div class="stat-num" id="statFlights">10,847</div>
+          <div class="stat-lbl">Flights Tracked Today</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-num" id="statAirports">943</div>
+          <div class="stat-lbl">Airports Monitored</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-num">24/7</div>
+          <div class="stat-lbl">Live Coverage</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-num">Free</div>
+          <div class="stat-lbl">Always Open Source</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section" id="about">
+      <div class="about-inner">
+        <div class="about-badge">Open Source</div>
+        <h2 class="about-title">Powered by Open Data</h2>
+        <p class="about-desc">ManwarAeroTrack uses publicly available data from the OpenSky Network and Open-Meteo APIs — no paywalls, no subscriptions, completely free.</p>
+        <div class="about-cards">
+          <div class="about-card">
+            <div class="about-card-icon">🛰</div>
+            <h3>OpenSky Network</h3>
+            <p>Real-time ADS-B flight data from a global network of receivers. Community-powered, open-access aviation data.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">🌤</div>
+            <h3>Open-Meteo</h3>
+            <p>Free weather API with no API key required. Accurate meteorological forecasts powered by open-source models.</p>
+          </div>
+          <div class="about-card">
+            <div class="about-card-icon">✈</div>
+            <h3>Airport Database</h3>
+            <p>Comprehensive IATA airport database with coordinates, timezone, and city information for accurate routing.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">✈</span>
+        <span>ManwarAeroTrack</span>
+      </div>
+      <div class="footer-links">
+        <a href="#tracker">Track</a>
+        <a href="#about">About</a>
+        <a href="https://opensky-network.org" target="_blank">OpenSky API</a>
+        <a href="https://open-meteo.com" target="_blank">Weather API</a>
+      </div>
+      <div class="footer-copy">© 2025 ManwarAeroTrack · Open Source · MIT License</div>
+    </div>
+  </footer>
+
+  <script src="airports.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
